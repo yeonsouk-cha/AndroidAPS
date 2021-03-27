@@ -1,6 +1,7 @@
 package info.nightscout.androidaps.database.entities
 
 import androidx.annotation.StringRes
+import com.google.gson.annotations.SerializedName
 
 sealed class XXXValueWithUnit {
 

@@ -29,7 +29,7 @@ object SealedClassHelper {
             jsonReader.beginObject() //start reading the object
             val nextName = jsonReader.nextName() //get the name on the object
             val innerClass = kClass.sealedSubclasses.firstOrNull {
-                it.simpleName!!.contains(nextName)
+                it.simpleName == nextName
             }
                 ?: throw Exception("$nextName is not found to be a data class of the sealed class ${kClass.qualifiedName}")
             val x = gson.fromJson<T>(jsonReader, innerClass.javaObjectType)

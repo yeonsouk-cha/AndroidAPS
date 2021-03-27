@@ -2,7 +2,6 @@ package info.nightscout.androidaps.utils.serialisation
 
 import com.google.gson.reflect.TypeToken
 import info.nightscout.androidaps.database.entities.XXXValueWithUnit
-import info.nightscout.androidaps.utils.ValueWithUnitWrapper
 
 object ValueWithUnitSerialiser {
 
@@ -15,4 +14,5 @@ object ValueWithUnitSerialiser {
         return SealedClassHelper.gson.fromJson<List<ValueWithUnitWrapper>>(string, itemType).map { it.wrapped }
     }
 
+    private class ValueWithUnitWrapper(val wrapped: XXXValueWithUnit)
 }

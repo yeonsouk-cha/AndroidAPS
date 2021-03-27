@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 7,
-    "identityHash": "7a8795e82743748b627944dc589e8626",
+    "identityHash": "61448976d9ce815e183033aeaa78c0ee",
     "entities": [
       {
         "tableName": "apsResults",
@@ -2699,7 +2699,7 @@
       },
       {
         "tableName": "userEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER NOT NULL, `utcOffset` INTEGER NOT NULL, `action` TEXT NOT NULL, `s` TEXT NOT NULL, `values` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER NOT NULL, `utcOffset` INTEGER NOT NULL, `action` TEXT NOT NULL, `remark` TEXT NOT NULL, `values` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -2726,8 +2726,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "s",
-            "columnName": "s",
+            "fieldPath": "remark",
+            "columnName": "remark",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -2918,7 +2918,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7a8795e82743748b627944dc589e8626')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '61448976d9ce815e183033aeaa78c0ee')"
     ]
   }
 }
