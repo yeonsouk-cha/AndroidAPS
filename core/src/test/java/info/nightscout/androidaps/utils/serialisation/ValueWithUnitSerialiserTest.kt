@@ -23,6 +23,31 @@ internal class ValueWithUnitSerialiserTest {
     }
 
     @Test
+    fun testSerialisationDeserizationNested() {
+
+        val list = listOf<XXXValueWithUnit>(
+            XXXValueWithUnit.SimpleString("hello"),
+            XXXValueWithUnit.SimpleInt(5),
+            XXXValueWithUnit.UNKNOWN,
+            XXXValueWithUnit.StringResource(3,
+                listOf(
+                    XXXValueWithUnit.SimpleString("hello"),
+                    XXXValueWithUnit.SimpleInt(5)
+                )
+            )
+        )
+
+        val serialized = ValueWithUnitSerialiser.toSealedClassJson(list)
+        val deserialized = ValueWithUnitSerialiser.fromJson(serialized)
+
+        Assert.assertEquals(4, list.size)
+        Assert.assertTrue(deserialized[3] is XXXValueWithUnit.StringResource)
+        Assert.assertEquals(XXXValueWithUnit.SimpleString("hello"), (deserialized[3] as XXXValueWithUnit.StringResource).params[0])
+        Assert.assertEquals(XXXValueWithUnit.SimpleInt(5), (deserialized[3] as XXXValueWithUnit.StringResource).params[1])
+
+    }
+
+    @Test
     fun testEmptyList() {
 
         val list = listOf<XXXValueWithUnit>()
@@ -31,6 +56,5 @@ internal class ValueWithUnitSerialiserTest {
         val deserialized = ValueWithUnitSerialiser.fromJson(serialized)
 
         Assert.assertEquals(0, list.size)
-        Assert.assertEquals(list, deserialized)
-    }
+      }
 }
