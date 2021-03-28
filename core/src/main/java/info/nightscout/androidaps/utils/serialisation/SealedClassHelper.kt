@@ -34,7 +34,6 @@ object SealedClassHelper {
                 ?: throw Exception("$nextName is not found to be a data class of the sealed class ${kClass.qualifiedName}")
             val x = gson.fromJson<T>(jsonReader, innerClass.javaObjectType)
             jsonReader.endObject()
-            //if there a static object, actually return that back to ensure equality and such!
             return innerClass.objectInstance as T? ?: x
         }
 
@@ -46,5 +45,6 @@ object SealedClassHelper {
             out.endObject()
         }
     }
-
 }
+
+inline fun <reified T> Gson.fromJson(json: String): T = fromJson(json, object : TypeToken<T>() {}.type)
