@@ -28,9 +28,8 @@ class MedtronicConverter @Inject constructor(
     private val aapsLogger: AAPSLogger,
     private val medtronicUtil: MedtronicUtil
 ) {
-
     fun convertResponse(pumpType: PumpType, commandType: MedtronicCommandType, rawContent: ByteArray?): Any? {
-        if ((rawContent == null || rawContent.size < 1) && commandType != MedtronicCommandType.PumpModel) {
+        if ((rawContent == null || rawContent.isEmpty()) && commandType != MedtronicCommandType.PumpModel) {
             aapsLogger.warn(LTag.PUMPCOMM, String.format(Locale.ENGLISH, "Content is empty or too short, no data to convert (type=%s,isNull=%b,length=%s)",
                 commandType.name, rawContent == null, rawContent?.size ?: "-"))
             return null
@@ -102,28 +101,23 @@ class MedtronicConverter @Inject constructor(
 
     private fun decodeBatteryStatus(rawData: ByteArray?): BatteryStatusDTO {
         // 00 7C 00 00
-        val batteryStatus = BatteryStatusDTO()
-        val status = rawData!![0].toInt()
-        if (status == 0) {
-            batteryStatus.batteryStatusType = BatteryStatusDTO.BatteryStatusType.Normal
-        } else if (status == 1) {
-            batteryStatus.batteryStatusType = BatteryStatusDTO.BatteryStatusType.Low
-        } else if (status == 2) {
-            batteryStatus.batteryStatusType = BatteryStatusDTO.BatteryStatusType.Unknown
+        val type = when (rawData!![0].toInt()) {
+            0 -> BatteryStatusDTO.BatteryStatusType.Normal
+            1 -> BatteryStatusDTO.BatteryStatusType.Low
+            2 -> BatteryStatusDTO.BatteryStatusType.Unknown
+            else -> BatteryStatusDTO.BatteryStatusType.Unknown
         }
         if (rawData.size > 1) {
-            var d: Double? //= null
 
             // if response in 3 bytes then we add additional information
-            d = if (rawData.size == 2) {
+            val voltage: Double = if (rawData.size == 2) {
                 rawData[1] * 1.0 / 100.0
             } else {
                 ByteUtil.toInt(rawData[1], rawData[2]) * 1.0 / 100.0
-            }
-            batteryStatus.voltage = d
-            batteryStatus.extendedDataReceived = true
+            } //= null
+            return BatteryStatusDTO(type, voltage, extendedDataReceived = true)
         }
-        return batteryStatus
+        return BatteryStatusDTO(type)
     }
 
     private fun decodeRemainingInsulin(rawData: ByteArray?): Double {

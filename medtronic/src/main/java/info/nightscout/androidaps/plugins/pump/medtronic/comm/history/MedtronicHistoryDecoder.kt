@@ -51,7 +51,7 @@ abstract class MedtronicHistoryDecoder<T : MedtronicHistoryEntry?> : MedtronicHi
         }
     }
 
-    fun processPageAndCreateRecords(rawHistoryPage: RawHistoryPage): List<T?>? {
+    fun processPageAndCreateRecords(rawHistoryPage: RawHistoryPage): List<T> {
         return processPageAndCreateRecords(rawHistoryPage, false)
     }
 

@@ -52,52 +52,50 @@ class MedtronicUITask {
     fun execute(communicationManager: MedtronicCommunicationManager) {
         aapsLogger.debug(LTag.PUMP, "MedtronicUITask: @@@ In execute. $commandType")
         when (commandType) {
-            MedtronicCommandType.PumpModel                                                 -> {
-                result = communicationManager.pumpModel
+            MedtronicCommandType.PumpModel -> {
+                result = communicationManager.pumpModel()
             }
 
-            MedtronicCommandType.GetBasalProfileSTD                                        -> {
-                result = communicationManager.basalProfile
+            MedtronicCommandType.GetBasalProfileSTD -> {
+                result = communicationManager.getBasalProfile()
             }
 
-            MedtronicCommandType.GetRemainingInsulin                                       -> {
-                result = communicationManager.remainingInsulin
+            MedtronicCommandType.GetRemainingInsulin -> {
+                result = communicationManager.remainingInsulin()
             }
 
-            MedtronicCommandType.GetRealTimeClock                                          -> {
-                result = communicationManager.pumpTime
+            MedtronicCommandType.GetRealTimeClock -> {
+                result = communicationManager.pumpTime()
                 medtronicUtil.pumpTime = null
             }
 
-            MedtronicCommandType.SetRealTimeClock                                          -> {
+            MedtronicCommandType.SetRealTimeClock -> {
                 result = communicationManager.setPumpTime()
             }
 
-            MedtronicCommandType.GetBatteryStatus                                          -> {
-                result = communicationManager.remainingBattery
+            MedtronicCommandType.GetBatteryStatus -> {
+                result = communicationManager.remainingBattery()
             }
 
-            MedtronicCommandType.SetTemporaryBasal                                         -> {
+            MedtronicCommandType.SetTemporaryBasal -> {
                 val tbr = tBRSettings
-                if (tbr != null) {
-                    result = communicationManager.setTBR(tbr)
-                }
+                result = communicationManager.setTBR(tbr)
             }
 
-            MedtronicCommandType.ReadTemporaryBasal                                        -> {
-                result = communicationManager.temporaryBasal
+            MedtronicCommandType.ReadTemporaryBasal -> {
+                result = communicationManager.temporaryBasal()
             }
 
-            MedtronicCommandType.Settings, MedtronicCommandType.Settings_512               -> {
-                result = communicationManager.pumpSettings
+            MedtronicCommandType.Settings, MedtronicCommandType.Settings_512 -> {
+                result = communicationManager.pumpSettings()
             }
 
-            MedtronicCommandType.SetBolus                                                  -> {
+            MedtronicCommandType.SetBolus -> {
                 val amount = getDoubleFromParameters(0)
-                if (amount != null) result = communicationManager.setBolus(amount)
+                result = communicationManager.setBolus(amount)
             }
 
-            MedtronicCommandType.CancelTBR                                                 -> {
+            MedtronicCommandType.CancelTBR -> {
                 result = communicationManager.cancelTBR()
             }
 
@@ -106,7 +104,7 @@ class MedtronicUITask {
                 result = communicationManager.setBasalProfile(profile)
             }
 
-            MedtronicCommandType.GetHistoryData                                            -> {
+            MedtronicCommandType.GetHistoryData -> {
                 result = communicationManager.getPumpHistory(parameters!![0] as PumpHistoryEntry?,
                     parameters!![1] as LocalDateTime?)
             }
@@ -130,7 +128,7 @@ class MedtronicUITask {
     //
     //
     private val tBRSettings: TempBasalPair
-        private get() = TempBasalPair(getDoubleFromParameters(0),  //
+        get() = TempBasalPair(getDoubleFromParameters(0),  //
             false,  //
             getIntegerFromParameters(1))
 

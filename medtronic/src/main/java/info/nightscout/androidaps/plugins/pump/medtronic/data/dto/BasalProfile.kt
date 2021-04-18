@@ -32,7 +32,8 @@ class BasalProfile {
 
     private val aapsLogger: AAPSLogger
 
-    @Expose var rawData  : ByteArray? = null // store as byte array to make transport (via parcel) easier
+    @Expose
+    lateinit var rawData: ByteArray // store as byte array to make transport (via parcel) easier
         private set
 
     private var listEntries: MutableList<BasalProfileEntry>? = null
@@ -48,18 +49,11 @@ class BasalProfile {
     }
 
     fun init() {
-        rawData = ByteArray(MAX_RAW_DATA_SIZE)
-        rawData!![0] = 0
-        rawData!![1] = 0
-        rawData!![2] = 0x3f
+        rawData = byteArrayOf(0, 0, 0x3f)
     }
 
     private fun setRawData(data: ByteArray): Boolean {
-        var dataInternal: ByteArray? = data
-        if (dataInternal == null) {
-            aapsLogger.error(LTag.PUMPCOMM, "setRawData: buffer is null!")
-            return false
-        }
+        var dataInternal: ByteArray = data
 
         // if we have just one entry through all day it looks like just length 1
         if (dataInternal.size == 1) {
@@ -68,7 +62,7 @@ class BasalProfile {
         if (dataInternal.size == MAX_RAW_DATA_SIZE) {
             rawData = dataInternal
         } else {
-            val len = Math.min(MAX_RAW_DATA_SIZE, data.size)
+            val len = data.size.coerceAtMost(MAX_RAW_DATA_SIZE)
             rawData = ByteArray(MAX_RAW_DATA_SIZE)
             System.arraycopy(data, 0, rawData, 0, len)
         }
@@ -81,17 +75,16 @@ class BasalProfile {
             return false
         }
         rawData = ByteArray(MAX_RAW_DATA_SIZE)
-        val item = 0
         var i = 0
         while (i < data.size - 2) {
             if (data[i] == 0.toByte() && data[i + 1] == 0.toByte() && data[i + 2] == 0.toByte()) {
-                rawData!![i] = 0
-                rawData!![i + 1] = 0
-                rawData!![i + 2] = 0
+                rawData[i] = 0
+                rawData[i + 1] = 0
+                rawData[i + 2] = 0
             }
-            rawData!![i] = data[i + 1]
-            rawData!![i + 1] = data[i + 2]
-            rawData!![i + 2] = data[i]
+            rawData[i] = data[i + 1]
+            rawData[i + 1] = data[i + 2]
+            rawData[i + 2] = data[i]
             i += 3
         }
         return true
@@ -139,12 +132,12 @@ class BasalProfile {
 
     // TODO: this function must be expanded to include changes in which profile is in use.
     // and changes to the profiles themselves.
-    fun getEntryForTime(`when`: Instant): BasalProfileEntry {
+    fun getEntryForTime(time: Instant): BasalProfileEntry {
         var rval = BasalProfileEntry()
         val entries = entries
-        if (entries.size == 0) {
+        if (entries.isEmpty()) {
             aapsLogger.warn(LTag.PUMPCOMM, String.format(Locale.ENGLISH, "getEntryForTime(%s): table is empty",
-                `when`.toDateTime().toLocalTime().toString("HH:mm")))
+                time.toDateTime().toLocalTime().toString("HH:mm")))
             return rval
         }
         // Log.w(TAG,"Assuming first entry");
@@ -153,13 +146,13 @@ class BasalProfile {
             aapsLogger.debug(LTag.PUMPCOMM, "getEntryForTime: Only one entry in profile")
             return rval
         }
-        val localMillis = `when`.toDateTime().toLocalTime().millisOfDay
+        val localMillis = time.toDateTime().toLocalTime().millisOfDay
         var done = false
         var i = 1
         while (!done) {
             val entry = entries[i]
             if (DEBUG_BASALPROFILE) {
-                aapsLogger.debug(LTag.PUMPCOMM, String.format(Locale.ENGLISH, "Comparing 'now'=%s to entry 'start time'=%s", `when`.toDateTime().toLocalTime()
+                aapsLogger.debug(LTag.PUMPCOMM, String.format(Locale.ENGLISH, "Comparing 'now'=%s to entry 'start time'=%s", time.toDateTime().toLocalTime()
                     .toString("HH:mm"), entry.startTime!!.toString("HH:mm")))
             }
             if (localMillis >= entry.startTime!!.millisOfDay) {
@@ -176,7 +169,7 @@ class BasalProfile {
             }
         }
         if (DEBUG_BASALPROFILE) {
-            aapsLogger.debug(LTag.PUMPCOMM, String.format(Locale.ENGLISH, "getEntryForTime(%s): Returning entry: rate=%.3f (%s), start=%s (%d)", `when`
+            aapsLogger.debug(LTag.PUMPCOMM, String.format(Locale.ENGLISH, "getEntryForTime(%s): Returning entry: rate=%.3f (%s), start=%s (%d)", time
                 .toDateTime().toLocalTime().toString("HH:mm"), rval.rate, ByteUtil.getHex(rval.rate_raw),
                 rval.startTime!!.toString("HH:mm"), rval.startTime_raw))
         }
@@ -187,18 +180,18 @@ class BasalProfile {
     val entries: List<BasalProfileEntry>
         get() {
             val entries: MutableList<BasalProfileEntry> = ArrayList()
-            if (rawData == null || rawData!![2] == 0x3f.toByte()) {
+            if (rawData[2] == 0x3f.toByte()) {
                 aapsLogger.warn(LTag.PUMPCOMM, "Raw Data is empty.")
                 return entries // an empty list
             }
             var r: Int
             var st: Int
             var i = 0
-            while (i < rawData!!.size - 2) {
-                if (rawData!![i] == 0.toByte() && rawData!![i + 1] == 0.toByte() && rawData!![i + 2] == 0.toByte()) break
-                if (rawData!![i] == 0.toByte() && rawData!![i + 1] == 0.toByte() && rawData!![i + 2] == 0x3f.toByte()) break
-                r = MedtronicUtil.makeUnsignedShort(rawData!![i + 1].toInt(), rawData!![i].toInt()) // readUnsignedByte(mRawData[i]);
-                st = readUnsignedByte(rawData!![i + 2])
+            while (i < rawData.size - 2) {
+                if (rawData[i] == 0.toByte() && rawData[i + 1] == 0.toByte() && rawData[i + 2] == 0.toByte()) break
+                if (rawData[i] == 0.toByte() && rawData[i + 1] == 0.toByte() && rawData[i + 2] == 0x3f.toByte()) break
+                r = MedtronicUtil.makeUnsignedShort(rawData[i + 1].toInt(), rawData[i].toInt()) // readUnsignedByte(mRawData[i]);
+                st = readUnsignedByte(rawData[i + 2])
                 try {
                     entries.add(BasalProfileEntry(aapsLogger, r, st))
                 } catch (ex: Exception) {
@@ -294,9 +287,8 @@ class BasalProfile {
         return true
     }
 
-
-
     companion object {
+
         const val MAX_RAW_DATA_SIZE = 48 * 3 + 1
         private const val DEBUG_BASALPROFILE = false
 

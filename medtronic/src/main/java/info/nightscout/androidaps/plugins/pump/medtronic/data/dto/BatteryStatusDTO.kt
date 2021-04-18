@@ -7,16 +7,11 @@ import java.util.*
 /**
  * Created by andy on 6/14/18.
  */
-class BatteryStatusDTO {
-
-    @Expose
-    var batteryStatusType: BatteryStatusType? = null
-    @Expose
-    var voltage: Double? = null
-
-    var extendedDataReceived = false
-
-
+class BatteryStatusDTO(
+    @Expose val batteryStatusType: BatteryStatusType,
+    @Expose val voltage: Double? = null,
+    val extendedDataReceived: Boolean = false
+) {
     fun getCalculatedPercent(batteryType: BatteryType): Int {
         if (voltage == null || batteryType === BatteryType.None) {
             return if (batteryStatusType == BatteryStatusType.Low || batteryStatusType == BatteryStatusType.Unknown) 18 else 70
